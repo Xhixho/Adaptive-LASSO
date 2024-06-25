@@ -7,5 +7,8 @@ propose to identify the optimal subset ARMA model by fitting an adaptive Lasso r
 fitted to the time series data, where the residuals serve as proxies for the innovations.
 
 
-For more details, you can read the full paper Of Chen \& Chan 
+For more details, you can read the full paper By Chen \& Chan 
 https://www.intlpress.com/site/pub/files/_fulltext/journals/sii/2011/0004/0002/SII-2011-0004-0002-a014.pdf
+
+
+Here you will find the Code about the method proposed from the paper and the Monte Carlo MC  simulations developed by Eleni Dretaki \& George Xhixho
