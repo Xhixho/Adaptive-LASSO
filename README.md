@@ -8,7 +8,7 @@ fitted to the time series data, where the residuals serve as proxies for the inn
 
 
 In an ARMA(p,q) model with an $AR(\infty)$ representation, it implies that all coefficients ($\Phi$) are known. Consequently, the entire set of residuals ${\epsilon_t}$ can be derived from the equation 
-$(1-\sum_{j=1}^{\infty}a_jB^j)Y_t=\epsilon_t$.
+$(1- \sum_{j=1}^{\infty} a_jB^j) Y_t=\epsilon_t$.
 	
 This suggests that for a long-term fitting of the AR(p) process to $Y_t$, one can approximate the unobserved $\epsilon_t$. However, the challenge lies in selecting appropriate model orders. The conventional method, still in use today, involves heuristically determining the model orders by inspecting sample auto-correlation and partial auto-correlation functions, such as ACF and PACF \cite{book3}. Despite its common usage, this traditional approach may result in misspecified models and potentially lead to poor forecasting performance.
 	
