@@ -21,24 +21,21 @@ To simplify the SARMA model, it can be reduced to an $ARMA(p^*,q^*)$ process, wh
 
 Let p and q to be upper bounds such that $p\geq p^*$ and $q\geq q^*$, for the $(p+1)(q+1)$ different models, the final order selection can be based off minimization of some measure of prediction error. Commonly used metrics for this purpose include information criteria such as AIC or BIC, which effectively penalize model complexity. To facilitate this process, step-wise selection algorithms are typically employed. These algorithms systematically assess and compare various model configurations, iteratively refining the selection based on the chosen criterion. The problem here is that the model selection becomes less effective and very computational costly for large p \& q when searching for $2^{p+q}$ unique subset of ARMA models. \\
 Chen \& Chan  introduce order selection via adaptive Lasso. Let $y = [y_m,...,y_\tau]^{'} ,\epsilon=[\epsilon_m,...,\epsilon_\tau]^{'}$, $\beta = [\phi^{'},\theta^{'}]=[\phi_1,...,\phi_p,\theta_1,...,\theta_q]^{'}$ and
-	\[
-	X = \begin{bmatrix}
+\begin{bmatrix}
 		x_{m}^{'} \\\
 		x_{m+1}^{'} \\\
 		\vdots \\\\
 		x_{\tau}^{'}
-	\end{bmatrix}
-	= \begin{bmatrix}
+\end{bmatrix}
+\begin{bmatrix}
 		y_{m-1} & \cdots & y_{m-p} & \hat{\epsilon}_{m-1} & \cdots & \hat{\epsilon}_{m-q} \\\
 		y_{m} & \cdots & y_{m-p+1} & \hat{\epsilon}_{m} & \cdots & \hat{\epsilon}_{m-q+1} \\\
 		\vdots & \ddots & \vdots & \vdots & \ddots & \vdots \\\
 		y_{\tau -1} & \cdots & y_{\tau-p} & \hat{\epsilon}_{\tau-1} & \cdots & \hat{\epsilon}_{\tau-q}
 	\end{bmatrix}
-	\]
-	\begin{equation}
-		y = X\beta + \epsilon
-	\end{equation}
-	where $\epsilon$, are the residuals from fitted $AR(p^{'})$ models used to estimate unknown innovations and $beta_j$ $j=1,...,p+q$ are nonzero . The goal is to identify the correct subset of nonzero components in the ARMA model. It has been proven that the adaptive Lasso method, in linear regression model can produce asymptotically unbiased estimators fro nonzero coefficients. However, this method does not apply directly to the ARMA model, due to $\epsilon_t$ terms.
+$$y = X\beta + \epsilon$$
+
+where $\epsilon$, are the residuals from fitted $AR(p^{'})$ models used to estimate unknown innovations and $beta_j$ $j=1,...,p+q$ are nonzero . The goal is to identify the correct subset of nonzero components in the ARMA model. It has been proven that the adaptive Lasso method, in linear regression model can produce asymptotically unbiased estimators fro nonzero coefficients. However, this method does not apply directly to the ARMA model, due to $\epsilon_t$ terms.
 	lasso estimator of $\beta$ is given by:
 	
 $$\hat{\beta}(\lambda) = \underset{\tau}{argmin}\left\{||y-X\beta|| + \lambda_\tau \sum_{j=1}^{p+q} \hat{w}_j |\tau_j| \right \}$$
