@@ -19,27 +19,30 @@ $$\Phi_P(B^s)\phi_p(B) Y_t=\Theta_Q(B^s)\theta_p(B)\epsilon_t$$
 	
 To simplify the SARMA model, it can be reduced to an $ARMA(p^*,q^*)$ process, where $\Phi_{p}^{}(B)Y_t=\Theta_{q}^{}(B)\epsilon_t$. Here, $m = \max\{p^*,q^*\} = \max\{Ps+p,Qs+q \}$, with $[p,P,q,Q,s] \in \mathbb{N}^5$. Consequently, our focus shifts to fitting the $ARMA(p^*,q^*)$ model for further analysis. 
 
-Let p and q to be upper bounds such that $p\geq p^*$ and $q\geq q^*$, for the $(p+1)(q+1)$ different models, the final order selection can be based off minimization of some measure of prediction error. Commonly used metrics for this purpose include information criteria such as AIC or BIC, which effectively penalize model complexity. To facilitate this process, step-wise selection algorithms are typically employed. These algorithms systematically assess and compare various model configurations, iteratively refining the selection based on the chosen criterion. The problem here is that the model selection becomes less effective and very computational costly for large p \& q when searching for $2^{p+q}$ unique subset of ARMA models. \\
+Let p and q be upper bounds such that $p\geq p^*$ and $q\geq q^*$, for the $(p+1)(q+1)$ different models, the final order selection can be based on minimization of some measure of prediction error. Commonly used metrics for this purpose include information criteria such as AIC or BIC, which effectively penalize model complexity. To facilitate this process, step-wise selection algorithms are typically employed. These algorithms systematically assess and compare various model configurations, iteratively refining the selection based on the chosen criterion. The problem here is that the model selection becomes less effective and very computationally costly for large p \& q when searching for $2^{p+q}$ unique subset of ARMA models. \\
 Chen \& Chan  introduce order selection via adaptive Lasso. Let $y = [y_m,...,y_\tau]^{'} ,\epsilon=[\epsilon_m,...,\epsilon_\tau]^{'}$, $\beta = [\phi^{'},\theta^{'}]=[\phi_1,...,\phi_p,\theta_1,...,\theta_q]^{'}$ and
+
+$$
 \begin{bmatrix}
-		x_{m}^{'} \\\
-		x_{m+1}^{'} \\\
-		\vdots \\\\
-		x_{\tau}^{'}
+    x_{m}^{'} \\
+    x_{m+1}^{'} \\
+    \vdots \\
+    x_{\tau}^{'}
 \end{bmatrix}
 \begin{bmatrix}
-		y_{m-1} & \cdots & y_{m-p} & \hat{\epsilon}_{m-1} & \cdots & \hat{\epsilon}_{m-q} \\\
-		y_{m} & \cdots & y_{m-p+1} & \hat{\epsilon}_{m} & \cdots & \hat{\epsilon}_{m-q+1} \\\
-		\vdots & \ddots & \vdots & \vdots & \ddots & \vdots \\\
-		y_{\tau -1} & \cdots & y_{\tau-p} & \hat{\epsilon}_{\tau-1} & \cdots & \hat{\epsilon}_{\tau-q}
-	\end{bmatrix}
+    y_{m-1} & \cdots & y_{m-p} & \hat{\epsilon}_{m-1} & \cdots & \hat{\epsilon}_{m-q} \\
+    y_{m} & \cdots & y_{m-p+1} & \hat{\epsilon}_{m} & \cdots & \hat{\epsilon}_{m-q+1} \\
+    \vdots & \ddots & \vdots & \vdots & \ddots & \vdots \\
+    y_{\tau -1} & \cdots & y_{\tau-p} & \hat{\epsilon}_{\tau-1} & \cdots & \hat{\epsilon}_{\tau-q}
+\end{bmatrix}
+$$
 $$y = X\beta + \epsilon$$
 
-where $\epsilon$, are the residuals from fitted $AR(p^{'})$ models used to estimate unknown innovations and $beta_j$ $j=1,...,p+q$ are nonzero . The goal is to identify the correct subset of nonzero components in the ARMA model. It has been proven that the adaptive Lasso method, in linear regression model can produce asymptotically unbiased estimators fro nonzero coefficients. However, this method does not apply directly to the ARMA model, due to $\epsilon_t$ terms.
+where $\epsilon$, are the residuals from fitted $AR(p^{'})$ models used to estimate unknown innovations and $beta_j$ $j=1,...,p+q$ are nonzero . The goal is to identify the correct subset of nonzero components in the ARMA model. It has been proven that the adaptive Lasso method, in a linear regression model, can produce asymptotically unbiased estimators for nonzero coefficients. However, this method does not apply directly to the ARMA model, due to $\epsilon_t$ terms.
 	lasso estimator of $\beta$ is given by:
 	
-$$\hat{\beta}(\lambda) = \underset{\tau}{argmin}\left\{||y-X\beta|| + \lambda_\tau \sum_{j=1}^{p+q} \hat{w}_j |\tau_j| \right \}$$
-Where $\lambda_\tau$ is the tuning parameter controlling the degree of penalization and $\hat{w}$ are the weights. From \cite{chan} the weights are:
+$$\hat{\beta}(\lambda) = \underset{\tau}{argmin}\left\{||y-X\beta|| + \lambda_\tau \sum_{j=1}^{p+q} \hat{w}_j |\tau_j|\right \}$$
+Where $\lambda_\tau$ is the tuning parameter controlling the degree of penalization and $\hat{w}$ are the weights. From Chen\& Chan the weights are:
 	$$\hat{w}=|\widetilde{\tau}|^{-\eta}$$
 	$$\widetilde{\tau}=(\hat{X}^T \hat{X})^{-1}\hat{X}^{T}y$$
-	which is the least square estimator of $\beta$ based on $\hat{X}$ and $\eta=2$ \cite{zou}.
+	which is the least square estimator of $\beta$ based on $\hat{X}$ and $\eta=2$.
