@@ -23,15 +23,15 @@ Let p and q to be upper bounds such that $p\geq p^*$ and $q\geq q^*$, for the $(
 Chen \& Chan  introduce order selection via adaptive Lasso. Let $y = [y_m,...,y_\tau]^{'} ,\epsilon=[\epsilon_m,...,\epsilon_\tau]^{'}$, $\beta = [\phi^{'},\theta^{'}]=[\phi_1,...,\phi_p,\theta_1,...,\theta_q]^{'}$ and
 	\[
 	X = \begin{bmatrix}
-		x_{m}^{'} \\
-		x_{m+1}^{'} \\
-		\vdots \\
+		x_{m}^{'} \\\
+		x_{m+1}^{'} \\\
+		\vdots \\\\
 		x_{\tau}^{'}
 	\end{bmatrix}
 	= \begin{bmatrix}
-		y_{m-1} & \cdots & y_{m-p} & \hat{\epsilon}_{m-1} & \cdots & \hat{\epsilon}_{m-q} \\
-		y_{m} & \cdots & y_{m-p+1} & \hat{\epsilon}_{m} & \cdots & \hat{\epsilon}_{m-q+1} \\
-		\vdots & \ddots & \vdots & \vdots & \ddots & \vdots \\
+		y_{m-1} & \cdots & y_{m-p} & \hat{\epsilon}_{m-1} & \cdots & \hat{\epsilon}_{m-q} \\\
+		y_{m} & \cdots & y_{m-p+1} & \hat{\epsilon}_{m} & \cdots & \hat{\epsilon}_{m-q+1} \\\
+		\vdots & \ddots & \vdots & \vdots & \ddots & \vdots \\\
 		y_{\tau -1} & \cdots & y_{\tau-p} & \hat{\epsilon}_{\tau-1} & \cdots & \hat{\epsilon}_{\tau-q}
 	\end{bmatrix}
 	\]
@@ -40,10 +40,9 @@ Chen \& Chan  introduce order selection via adaptive Lasso. Let $y = [y_m,...,y_
 	\end{equation}
 	where $\epsilon$, are the residuals from fitted $AR(p^{'})$ models used to estimate unknown innovations and $beta_j$ $j=1,...,p+q$ are nonzero . The goal is to identify the correct subset of nonzero components in the ARMA model. It has been proven that the adaptive Lasso method, in linear regression model can produce asymptotically unbiased estimators fro nonzero coefficients. However, this method does not apply directly to the ARMA model, due to $\epsilon_t$ terms.
 	lasso estimator of $\beta$ is given by:
-	\begin{equation}
-		\hat{\beta}(\lambda) = \underset{\tau}{argmin}\left\{||y-X\beta|| + \lambda_\tau \sum_{j=1}^{p+q} \hat{w}_j |\tau_j| \right \}
-	\end{equation}
-	Where $\lambda_\tau$ is the tuning parameter controlling the degree of penalization and $\hat{w}$ are the weights. From \cite{chan} the weights are:
+	
+$$\hat{\beta}(\lambda) = \underset{\tau}{argmin}\left\{||y-X\beta|| + \lambda_\tau \sum_{j=1}^{p+q} \hat{w}_j |\tau_j| \right \}$$
+Where $\lambda_\tau$ is the tuning parameter controlling the degree of penalization and $\hat{w}$ are the weights. From \cite{chan} the weights are:
 	$$\hat{w}=|\widetilde{\tau}|^{-\eta}$$
 	$$\widetilde{\tau}=(\hat{X}^T \hat{X})^{-1}\hat{X}^{T}y$$
 	which is the least square estimator of $\beta$ based on $\hat{X}$ and $\eta=2$ \cite{zou}.
