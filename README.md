@@ -15,9 +15,7 @@ When dealing with a time series showcasing a seasonal or cyclical phenomenon wit
 	
 For time series exhibiting periodicity, the Seasonal Autoregressive Moving Average (SARMA) model serves as a natural extension of the ARMA framework. For cases where $s > 1$, the SARMA model takes the form $SARMA(p,q) \times (P,Q)$, where $P$ denotes the order of the seasonal autoregressive component, and $Q$ is the order of the seasonal moving average component. This model can be expressed through Equation (8) as:
 	
-	\begin{equation}
-		\Phi_P(B^s)\phi_p(B) Y_t=\Theta_Q(B^s)\theta_p(B)\epsilon_t
-	\end{equation}
+$\Phi_P(B^s)\phi_p(B) Y_t=\Theta_Q(B^s)\theta_p(B)\epsilon_t$
 	
 	To simplify the SARMA model, it can be reduced to an $ARMA(p^*,q^*)$ process, where $\Phi_{p}^{}(B)Y_t=\Theta_{q}^{}(B)\epsilon_t$. Here, $m = \max\{p^*,q^*\} = \max\{Ps+p,Qs+q \}$, with $[p,P,q,Q,s] \in \mathbb{N}^5$. Consequently, our focus shifts to fitting the $ARMA(p^*,q^*)$ model for further analysis. \\
 	Let p and q to be upper bounds such that $p\geq p^*$ and $q\geq q^*$, for the $(p+1)(q+1)$ different models, the final order selection can be based off minimization of some measure of prediction error. Commonly used metrics for this purpose include information criteria such as AIC or BIC, which effectively penalize model complexity. To facilitate this process, step-wise selection algorithms are typically employed. These algorithms systematically assess and compare various model configurations, iteratively refining the selection based on the chosen criterion. The problem here is that the model selection becomes less effective and very computational costly for large p \& q when searching for $2^{p+q}$ unique subset of ARMA models. \\
