@@ -12,3 +12,4 @@ https://www.intlpress.com/site/pub/files/_fulltext/journals/sii/2011/0004/0002/S
 
 
 Here you will find the Code about the method proposed from the paper and the Monte Carlo MC  simulations developed by Eleni Dretaki \& George Xhixho
+There are also some plug ins, we add some extra features like Adaptive Ridge and Adaptive Elastic-Net.
