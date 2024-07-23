@@ -4,14 +4,11 @@ library(doParallel)
 library(MCMCpack)
 library(readr)
 library(bayesreg)
-library(ggplot2)
-library(gridExtra)
 library(forecast)
 library(rqPen)
 library(stats)
 library(forecastML)
-library(tseries)###for bds.test
-library(lmtest)###for resettest
+
 
 lag.func <- function(x, k,pq) {
   t = length(x)
