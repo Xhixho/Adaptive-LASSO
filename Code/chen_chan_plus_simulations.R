@@ -3,12 +3,14 @@ library(glmnet)
 library(doParallel)
 library(MCMCpack)
 library(readr)
+library(gridExtra)
 library(bayesreg)
 library(forecast)
 library(rqPen)
 library(stats)
 library(forecastML)
 
+set.seed(5363234)
 
 lag.func <- function(x, k,pq) {
   t = length(x)
@@ -20,28 +22,60 @@ lag.func <- function(x, k,pq) {
   return(y)
 }
 
-chen_chan <- function(x, h = 1, long.ar.select, maxP, maxQ, updateMA = FALSE, ic = c("BIC", "AIC", "AICc"),eta = 2, alpha = seq(0, 1, 0.1), Method = c("LADADLASSO", "ADLASSO","ADENET","LADADENET","RIDGE"), w.Method = c("LASSO", "RIDGE", "LS")) {
+chen_chan.plus <- function(x, h = 1, maxP, maxQ, updateMA = FALSE, ic = c("BIC", "AIC", "AICc"),eta = 2, alpha = seq(0, 1, 0.1), Method = c("LADADLASSO", "ADLASSO","ADENET","LADADENET","RIDGE"), w.Method = c("LASSO", "RIDGE", "LS")) {
+  
+  ####################################
+  
+  # The chen_chan.plus function uses the methodology described by the Chen & Chen "Adaptive Lasso", plus some extra methods which have been added by 
+  # Professor Y. Kamarianakis, 
+  # and students E. Dretaki, G. Xhixho 
+  
+  ####################################
+  
+  # 
+  # x : the uni variate time series
+  # h :  
+  # maxP , maxQ : maximum  AR & MA order 
+  # ic : information Critiria 
+  # eta : weights power |tau|^(-eta)
+  # alpha : vector from o to 1, used to find the best alpha in elastic net
+  # Method : shrinkage Method 
+  #         "LADADLASSO" -> lad adaptive lasso
+  #         "ADLASSO" -> adaptive lasso
+  #         "ADENET" -> adaptive elastic net
+  #         "LADADENET" -> lad adaptive elastic net
+  #         "RIDGE" -> just ridge
+  # w.Method : how weights are computed
+  
+  #####################################
+  
+  
+  
   require(glmnet)
   require(quantreg)
   Method <- match.arg(Method)
   w.Method <- match.arg(w.Method)
   ic <- match.arg(ic)
   
-  Nt <- length(x)
+  
+  Nt <- length(x) 
   
   
-  init.mod.est <- ar(x, aic = TRUE, order.max = Nt - 1, demean = TRUE)
+  init.mod.est <- ar(x, aic = TRUE, order.max = Nt - 1, demean = TRUE) # fit an autoregressive model by minimizing the AIC
   init.mod.error <- residuals(init.mod.est)
   init.mod.order <- length(which(is.na(init.mod.error))) 
   
-  m <- init.mod.est$order + max(maxP, maxQ) + 1
+  m <- init.mod.est$order + max(maxP, maxQ) + 1 
   
+  
+
   dataP <- foreach(p = 1:maxP, .combine = cbind) %do% {
     lag.func(x, m, p)
   }
   dataQ <- foreach(q = 1:maxQ, .combine = cbind) %do% {
     lag.func(init.mod.error, m, q)
   }
+  
   
   first.modX <- as.matrix(cbind(dataP, dataQ))
   first.y <- x[m:(Nt - 1)]
@@ -70,8 +104,8 @@ chen_chan <- function(x, h = 1, long.ar.select, maxP, maxQ, updateMA = FALSE, ic
     
     out <- list(final.mod.coef = final.mod.coef, final.mod.int = final.mod.int, final.mod.s2 = final.mod.s2)
     return(out)
-  }
-  else if (Method == "ADLASSO") {
+    
+  }else if (Method == "ADLASSO") {
     if (w.Method == "RIDGE") {
       first.mod.est <- suppressWarnings(glmnet(y = first.y, x = first.modX, standardize = TRUE, alpha = 0))
     } else if (w.Method == "LASSO") {
@@ -131,6 +165,7 @@ chen_chan <- function(x, h = 1, long.ar.select, maxP, maxQ, updateMA = FALSE, ic
     
     out <- list(final.mod.coef = final.mod.coef, final.mod.int = final.mod.int, nonzero.select = nonzero.select, final.mod.s2 = final.mod.s2)
     return(out)
+    
   }else if (Method == "ADENET") {
     # Initial LASSO Weights
     if (w.Method == "RIDGE") {
@@ -294,6 +329,11 @@ chen_chan <- function(x, h = 1, long.ar.select, maxP, maxQ, updateMA = FALSE, ic
 
 
 model.one <- function(n,p,d){
+  # simulation ARMA model 
+  # (1 - 0.8B - 0.7B^7 + 0.56B^7)y_t=e_t
+  # p the percentage of contaminated data
+  # d the variance 
+  # returns the simulated data, true coefficients & number of non-zero coef
   bernoulli.samples <- rbinom(n,1,p)
   w <- rnorm(n)
   for (u in 1:n){
@@ -323,6 +363,11 @@ model.one <- function(n,p,d){
 
 
 model.two <- function(n,p,d){
+  # simulation ARMA model 
+  # (1 - 0.8B - 0.7B^7 + 0.56B^7)y_t=(1 + 0.8B + 0.7B^6 + 0.56B^7)e_t
+  # p the percentage of contaminated data
+  # d the variance 
+  # returns the simulated data, true coefficients & number of non-zero coef
   bernoulli.samples <- rbinom(n,1,p)
   w <- rnorm(n)
   for (u in 1:n){
@@ -348,6 +393,11 @@ model.two <- function(n,p,d){
 }
 
 model.three <- function(n,p,d){
+  # simulation ARMA model 
+  # y_t=(1 + 0.8B + 0.7B^6 + 0.56B^7)e_t
+  # p the percentage of contaminated data
+  # d the variance 
+  # returns the simulated data, true coefficients & number of non-zero coef
   bernoulli.samples <- rbinom(n,1,p)
   w <- rnorm(n)
   for (u in 1:n){
@@ -372,6 +422,12 @@ model.three <- function(n,p,d){
 }
 
 model.four <- function(n, p, d) {
+  # simulation ARMA model 
+  # y_t=(1 - 0.6B - 0.8B^12)e_t
+  # p the percentage of contaminated data
+  # d the variance 
+  # returns the simulated data, true coefficients & number of non-zero coef
+  
   bernoulli.samples <- rbinom(n, 1, p)
   w <- rnorm(n)
   for (u in 1:n){
@@ -392,17 +448,12 @@ model.four <- function(n, p, d) {
   
 
   
-  true.coef <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.8)
+  true.coef <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.8)
   number.coef <- 2
   out <- list(y, true.coef, number.coef)
   return(out)
 }
 
-
-# Set parameters
-n <- 360  # Number of samples
-p <- 0.1  # Probability for Bernoulli samples
-d <- 1    # Standard deviation for noise
 
 
 ################## Evaluations of the Chen & Chan method plus the Adaptive LAD and Elastic net method ##########################
@@ -414,67 +465,82 @@ MC <- 1000 # Monte Carlo number of experiments
 ic <- c("BIC","AIC") # Information critiria 
 w.method <- c("LASSO","RIDGE","LS") # Method of calculating the Weights 
 models <- c("one","two","three","four") #simulatuons Methods
+a.method <- c("LADADLASSO", "ADLASSO","ADENET","LADADENET","RIDGE") # shrinkage methods
 
-max.p <- 14 # maximum AR order
-max.q <- 14 # maximum MA order
+
 
 for (model.c in models) {
   cat('Model:', model.c, "\n")
-  for (icc in ic) {
-    cat('Information Criterion:', icc, "\n")
-    for (w in w.method) {
-
-      cat('Weighting Method:', w, "\n")
-
-      for (i in n) {
-        corect.model <- 0
-        significant.variables <- 0
-        true.positive.rate <- numeric()
-        false.positive.rate <- numeric()
-        false.negative.rate <- numeric()
-        for (mc in 1:MC) {
-          
-          model_function <- get(paste0("model.", model.c))
-          temp <- model_function(i, p = 0.1, d = 1)  
-          y <- temp[[1]]
-          true.coef <- temp[[2]]
-          number.coef <- temp[[3]]
-          model <- chen_chan(x = y, long.ar.select = TRUE, maxP = max.p, maxQ = max.q, ic = icc, Method = "LADADENET", w.Method = w)
-          
-          false.positive.rate <- c(false.positive.rate, sum(model$final.mod.coef != 0 & true.coef == 0) / (sum(model$final.mod.coef != 0 & true.coef == 0) + sum(model$final.mod.coef != 0 & true.coef != 0)))
-          false.negative.rate <- c(false.negative.rate, sum(model$final.mod.coef == 0 & true.coef != 0) / (sum(model$final.mod.coef != 0 & true.coef != 0) + sum(model$final.mod.coef == 0 & true.coef == 0)))
-          true.positive.rate <- c(true.positive.rate, sum(model$final.mod.coef != 0 & true.coef != 0) / (sum(model$final.mod.coef != 0 & true.coef != 0) + sum(model$final.mod.coef != 0 & true.coef == 0)))
-          
-
-          
-          # Initialize the order variables
-          ar.order <- FALSE
-          ma.order <- FALSE
-          
-          # Check AR order 
-          if (any(true.coef[1:max.p] != 0) && any(model$final.mod.coef[1:max.p] != 0)) {
-            ar.order <- tail(which(true.coef[1:max.p] != 0), 1) == tail(which(model$final.mod.coef[1:max.p] != 0), 1)
-          } else if (!any(true.coef[1:max.p] != 0) && !any(model$final.mod.coef[1:max.p] != 0)) {
-            ar.order <- TRUE
-          }
-          
-          # Check MA order 
-          if (any(true.coef[(max.p+1):(max.p*2)] != 0) && any(model$final.mod.coef[(max.p+1):(max.p*2)] != 0)) {
-            ma.order <- tail(which(true.coef[8:14] != 0), 1) == tail(which(model$final.mod.coef[(max.p+1):(max.p*2)] != 0), 1)
-          } else if (!any(true.coef[(max.p+1):(max.p*2)] != 0) && !any(model$final.mod.coef[(max.p+1):(max.p*2)] != 0)) {
-            ma.order <- TRUE
-          }
-          
-          if (ar.order && ma.order) {
-            corect.model <- corect.model + 1
-          }
-        }
-        
-        corect.model.rate <- corect.model / MC
-        cat("n =", i, "A:", median(true.positive.rate, na.rm = TRUE), "T:", corect.model.rate, '+', median(false.positive.rate, na.rm = TRUE), '-', median(false.negative.rate, na.rm = TRUE), '\n')
-      }
-    }
+  if (model.c=="four"){
+    max.p <- 12 # maximum AR order
+    max.q <- 12 # maximum MA order
+  }else{
+    max.p <- 7 # maximum AR order
+    max.q <- 7 # maximum MA order
   }
+  for (srink.method in a.method){
+    cat("Shrinkage Method: ", srink.method, "\n")
+    for (icc in ic) {
+      cat('Information Criterion:', icc, "\n")
+      for (w in w.method) {
+
+        cat('Weighting Method:', w, "\n")
+
+        for (i in n) {
+          # initialize the evaluation metrics 
+          corect.model <- 0
+          true.positive.rate <- numeric()
+          false.positive.rate <- numeric()
+          false.negative.rate <- numeric()
+          for (mc in 1:MC) {
+            
+            model_function <- get(paste0("model.", model.c)) 
+            temp <- model_function(i, p = 0.1, d = 2)  # sample from the model
+            y <- temp[[1]]
+            true.coef <- temp[[2]]
+            number.coef <- temp[[3]]
+            model <- chen_chan.plus(x = y, maxP = max.p, maxQ = max.q, ic = icc, Method = srink.method, w.Method = w)
+            
+            # Evaluation metrics
+            false.positive.rate <- c(false.positive.rate, sum(model$final.mod.coef != 0 & true.coef == 0) / (sum(model$final.mod.coef != 0 & true.coef == 0) + sum(model$final.mod.coef != 0 & true.coef != 0)))
+            false.negative.rate <- c(false.negative.rate, sum(model$final.mod.coef == 0 & true.coef != 0) / (sum(model$final.mod.coef != 0 & true.coef != 0) + sum(model$final.mod.coef == 0 & true.coef == 0)))
+            true.positive.rate <- c(true.positive.rate, sum(model$final.mod.coef != 0 & true.coef != 0) / (sum(model$final.mod.coef != 0 & true.coef != 0) + sum(model$final.mod.coef != 0 & true.coef == 0)))
+            
+
+            
+            # Initialize the order variables
+            ar.order <- FALSE
+            ma.order <- FALSE
+            
+            
+            # Check AR order 
+            if (any(true.coef[1:max.p] != 0) && any(model$final.mod.coef[1:max.p] != 0)) {
+              ar.order <- tail(which(true.coef[1:max.p] != 0), 1) == tail(which(model$final.mod.coef[1:max.p] != 0), 1)
+            } else if (!any(true.coef[1:max.p] != 0) && !any(model$final.mod.coef[1:max.p] != 0)) {
+              ar.order <- TRUE
+            }
+            
+            # Check MA order 
+            if (any(true.coef[(max.p+1):(max.p*2)] != 0) && any(model$final.mod.coef[(max.p+1):(max.p*2)] != 0)) {
+              ma.order <- tail(which(true.coef[(max.p+1):(max.p*2)] != 0), 1) == tail(which(model$final.mod.coef[(max.p+1):(max.p*2)] != 0), 1)
+            } else if (!any(true.coef[(max.p+1):(max.p*2)] != 0) && !any(model$final.mod.coef[(max.p+1):(max.p*2)] != 0)) {
+              ma.order <- TRUE
+            }
+            
+            if (ar.order && ma.order) {
+              corect.model <- corect.model + 1
+            }
+          }
+          corect.model.rate <- corect.model / MC
+          cat("n =", i, "A:", round(median(true.positive.rate, na.rm = TRUE),2), "T:", round(corect.model.rate,2), '+', round(median(false.positive.rate, na.rm = TRUE),2), '-', round(median(false.negative.rate, na.rm = TRUE),2), '\n')
+        }
+        cat(" \n")
+      }
+      cat(" \n")
+    }
+    cat(" \n")
+  }
+  cat(" \n")
 }
 
 
